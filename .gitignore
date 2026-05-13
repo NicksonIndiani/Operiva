@@ -1,0 +1,20 @@
+# Rust
+/target
+**/*.rs.bk
+Cargo.lock.bak
+
+# Env
+.env
+.env.local
+.envrc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# SQLx offline cache (commitada conscientemente quando estável; ignorada por padrão)
+.sqlx/

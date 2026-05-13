@@ -1,0 +1,83 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/infrastructure",
+    "crates/api",
+    "crates/server",
+]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.78"
+authors = ["Projeto da Vida"]
+license = "UNLICENSED"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
+[workspace.dependencies]
+# async runtime
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+
+# erros
+thiserror = "1"
+anyhow = "1"
+
+# tempo / ids
+time = { version = "0.3", features = ["serde", "macros"] }
+uuid = { version = "1", features = ["v7", "serde"] }
+
+# serde
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+
+# crypto / random
+argon2 = "0.5"
+rand = "0.8"
+sha2 = "0.10"
+base64 = "0.22"
+zeroize = { version = "1", features = ["derive"] }
+
+# jwt
+jsonwebtoken = "9"
+
+# regex
+regex = "1"
+
+# http server
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.5"
+tower-http = { version = "0.5", features = ["trace", "request-id", "set-header", "cors"] }
+tower-governor = "0.4"
+
+# db
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "uuid", "time", "migrate", "macros"] }
+
+# email / http client
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# config
+figment = { version = "0.10", features = ["env", "toml"] }
+
+# testes
+async-trait = "0.1"
+wiremock = "0.6"
