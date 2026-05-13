@@ -1,3 +1,3 @@
-pub mod email;
+mod email;
 
 pub use email::{Email, EmailError};

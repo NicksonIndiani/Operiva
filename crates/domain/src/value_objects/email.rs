@@ -6,16 +6,16 @@ use thiserror::Error;
 
 const MAX_LEN: usize = 254;
 
-/// Regex estática validada em tempo de compilação por testes — o `expect` aqui
-/// é seguro (regex literal não muda em runtime). Allow local para satisfazer
-/// `clippy::expect_used = "deny"` do workspace.
+/// Static regex — `expect` is safe (compile-time-checked literal) but the
+/// workspace lint `clippy::expect_used = "deny"` requires an explicit allow.
 #[allow(clippy::expect_used)]
 fn email_regex() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        // Local: letras/números/._%+- (1+). Domínio: rótulos separados por ponto,
-        // com pelo menos uma label antes da TLD (TLD 2+ letras).
-        Regex::new(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$")
+        // Local part: one or more chunks of allowed chars (letters/digits/_%+-),
+        // separated by single dots (no leading/trailing/consecutive dots).
+        // Domain: labels separated by dots, TLD must be 2+ letters.
+        Regex::new(r"^[A-Za-z0-9_%+\-]+(?:\.[A-Za-z0-9_%+\-]+)*@[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9\-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$")
             .expect("static email regex is valid")
     })
 }
@@ -31,7 +31,7 @@ pub enum EmailError {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Email(String);
 
 impl Email {
@@ -63,6 +63,14 @@ impl Email {
 impl fmt::Display for Email {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Email {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s = String::deserialize(deserializer)?;
+        Self::parse(&s).map_err(serde::de::Error::custom)
     }
 }
 
@@ -131,5 +139,45 @@ mod tests {
             Email::parse("alice@example"),
             Err(EmailError::InvalidFormat)
         );
+    }
+
+    #[test]
+    fn rejects_leading_dot_in_local_part() {
+        assert_eq!(
+            Email::parse(".alice@example.com"),
+            Err(EmailError::InvalidFormat)
+        );
+    }
+
+    #[test]
+    fn rejects_trailing_dot_in_local_part() {
+        assert_eq!(
+            Email::parse("alice.@example.com"),
+            Err(EmailError::InvalidFormat)
+        );
+    }
+
+    #[test]
+    fn rejects_consecutive_dots_in_local_part() {
+        assert_eq!(
+            Email::parse("alice..bob@example.com"),
+            Err(EmailError::InvalidFormat)
+        );
+    }
+
+    #[test]
+    fn accepts_max_length_email() {
+        // 254 chars total: local part 249 chars + "@b.co" (5) = 254
+        let local = "a".repeat(249);
+        let s = format!("{local}@b.co");
+        assert_eq!(s.len(), 254);
+        let email = Email::parse(&s).unwrap();
+        assert_eq!(email.as_str().len(), 254);
+    }
+
+    #[test]
+    fn parses_plus_addressing() {
+        let email = Email::parse("alice+filter@example.com").unwrap();
+        assert_eq!(email.as_str(), "alice+filter@example.com");
     }
 }
