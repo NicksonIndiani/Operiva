@@ -2,4 +2,5 @@
 
 #![forbid(unsafe_code)]
 
+pub mod entities;
 pub mod value_objects;
