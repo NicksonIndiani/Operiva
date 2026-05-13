@@ -11,11 +11,9 @@ members = [
 [workspace.package]
 edition = "2021"
 rust-version = "1.78"
+authors = ["Operiva"]
 license = "UNLICENSED"
 publish = false
-
-# Nota: `authors` foi deliberadamente omitido. O produto ainda não tem
-# nome comercial; quando tiver, este campo será preenchido.
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
