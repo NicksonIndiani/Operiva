@@ -21,6 +21,12 @@ pub enum PlaintextPasswordError {
 pub struct PlaintextPassword(String);
 
 impl PlaintextPassword {
+    /// Parses a plaintext password.
+    ///
+    /// Consumes `raw` (taking ownership so the original allocation can be
+    /// zeroized on drop). This is intentionally different from `Email::parse`
+    /// which takes `&str` — for secrets we MUST take ownership to avoid
+    /// leaving an extra un-zeroed copy in the caller's memory.
     pub fn parse(raw: impl Into<String>) -> Result<Self, PlaintextPasswordError> {
         let s = raw.into();
         let len = s.chars().count();
@@ -68,6 +74,11 @@ impl HashedPassword {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    #[must_use]
+    pub fn into_string(self) -> String {
+        self.0
+    }
 }
 
 impl std::fmt::Debug for HashedPassword {
@@ -99,6 +110,11 @@ mod tests {
 
     #[test]
     fn plaintext_rejects_short() {
+        // PlaintextPassword has no Debug/PartialEq (by design — secrets must not
+        // compare via `==` nor format in panics). So we can't use
+        // `assert_eq!(parse(...), Err(...))` like `email.rs` does, and we can't
+        // use `.unwrap_err()` either (it requires T: Debug). Pattern: extract the
+        // error via `.err().unwrap()` then assert on it.
         let err = PlaintextPassword::parse("short").err().unwrap();
         assert_eq!(err, PlaintextPasswordError::TooShort(12));
     }
@@ -137,6 +153,16 @@ mod tests {
             HashedPassword::from_phc_string(""),
             Err(HashedPasswordError::Empty)
         );
+    }
+
+    #[test]
+    fn plaintext_does_not_trim_whitespace() {
+        // Passwords are NOT trimmed (OWASP: leading/trailing spaces are valid
+        // password chars). Diverges intentionally from `Email::parse`, which
+        // trims display-style strings.
+        let p = PlaintextPassword::parse("            ").unwrap(); // 12 spaces
+        assert_eq!(p.expose().len(), 12);
+        assert_eq!(p.expose(), "            ");
     }
 
     #[test]
