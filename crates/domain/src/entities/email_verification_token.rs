@@ -1,13 +1,15 @@
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::value_objects::TokenHash;
+
 /// Email verification token. Only the **hash** of the plaintext token is stored —
 /// the plaintext is sent to the user via email and never persisted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EmailVerificationToken {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub token_hash: String,
+    pub token_hash: TokenHash,
     pub expires_at: OffsetDateTime,
     pub consumed_at: Option<OffsetDateTime>,
     pub created_at: OffsetDateTime,
@@ -18,7 +20,7 @@ impl EmailVerificationToken {
     pub fn new(
         id: Uuid,
         user_id: Uuid,
-        token_hash: String,
+        token_hash: TokenHash,
         expires_at: OffsetDateTime,
         now: OffsetDateTime,
     ) -> Self {
@@ -56,6 +58,7 @@ impl EmailVerificationToken {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use time::Duration;
     use uuid::Uuid;
@@ -66,7 +69,7 @@ mod tests {
         EmailVerificationToken::new(
             Uuid::nil(),
             Uuid::nil(),
-            "hash".to_string(),
+            TokenHash::from_hash_string("hash").unwrap(),
             now + Duration::hours(24),
             now,
         )
