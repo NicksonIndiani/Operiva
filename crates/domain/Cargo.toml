@@ -1,0 +1,20 @@
+[package]
+name = "domain"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+thiserror.workspace = true
+time = { workspace = true }
+uuid = { workspace = true }
+regex.workspace = true
+zeroize.workspace = true
+serde = { workspace = true, optional = true }
+
+[features]
+default = []
+serde = ["dep:serde", "uuid/serde", "time/serde"]
