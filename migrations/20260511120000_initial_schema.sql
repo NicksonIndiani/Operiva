@@ -1,7 +1,7 @@
 -- migrations/20260511120000_initial_schema.sql
--- Auth v1 — schema inicial. Spec: 2026-05-11-auth-api-design.md §3
+-- Auth v1 — initial schema. Spec: 2026-05-11-auth-api-design.md §3.
 
--- Trigger function para updated_at
+-- Trigger function for the updated_at column.
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -36,7 +36,8 @@ CREATE TABLE users (
     updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX users_email_idx ON users (email);
+-- Note: the UNIQUE constraint on `email` already creates an implicit B-tree
+-- index (users_email_key). We deliberately do NOT add a duplicate index here.
 
 CREATE TRIGGER users_set_updated_at
     BEFORE UPDATE ON users
@@ -60,7 +61,7 @@ CREATE TRIGGER memberships_set_updated_at
     BEFORE UPDATE ON memberships
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- sessions (usado nos planos 1b/1c — criado aqui para evitar migração futura quebrada)
+-- sessions (consumed by plans 1b/1c; created here to avoid a future breaking migration)
 CREATE TABLE sessions (
     id                  UUID PRIMARY KEY,
     user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -88,7 +89,7 @@ CREATE TABLE email_verification_tokens (
 
 CREATE INDEX evt_user_idx ON email_verification_tokens (user_id) WHERE consumed_at IS NULL;
 
--- password_reset_tokens (usado no plano 3 — criado aqui)
+-- password_reset_tokens (consumed by plan 3; created here)
 CREATE TABLE password_reset_tokens (
     id          UUID PRIMARY KEY,
     user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

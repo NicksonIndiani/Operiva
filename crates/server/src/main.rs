@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
 
 fn main() {
-    println!("server stub — wire-up acontece no plano 1c");
+    println!("server stub — wire-up happens in plan 1c");
 }

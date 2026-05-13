@@ -34,11 +34,11 @@ missing_panics_doc = "allow"
 # async runtime
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
 
-# erros
+# errors
 thiserror = "1"
 anyhow = "1"
 
-# tempo / ids
+# time / ids
 time = { version = "0.3", features = ["serde", "macros"] }
 uuid = { version = "1", features = ["v7", "serde"] }
 
@@ -78,6 +78,6 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 # config
 figment = { version = "0.10", features = ["env", "toml"] }
 
-# testes
+# testing
 async-trait = "0.1"
 wiremock = "0.6"

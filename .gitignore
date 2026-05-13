@@ -16,5 +16,8 @@ Cargo.lock.bak
 # OS
 .DS_Store
 
-# SQLx offline cache (commitada conscientemente quando estável; ignorada por padrão)
+# SQLx offline cache (deliberately committed once stable; ignored by default)
 .sqlx/
+
+# Internal design docs and implementation plans (not for the public repo)
+docs/
