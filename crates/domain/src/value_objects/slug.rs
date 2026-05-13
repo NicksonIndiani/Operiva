@@ -103,8 +103,14 @@ mod tests {
 
     #[test]
     fn rejects_empty() {
-        assert_eq!(OrganizationSlug::parse(""), Err(OrganizationSlugError::Empty));
-        assert_eq!(OrganizationSlug::parse("   "), Err(OrganizationSlugError::Empty));
+        assert_eq!(
+            OrganizationSlug::parse(""),
+            Err(OrganizationSlugError::Empty)
+        );
+        assert_eq!(
+            OrganizationSlug::parse("   "),
+            Err(OrganizationSlugError::Empty)
+        );
     }
 
     #[test]

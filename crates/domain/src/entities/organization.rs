@@ -20,7 +20,13 @@ impl Organization {
         name: OrganizationName,
         now: OffsetDateTime,
     ) -> Self {
-        Self { id, slug, name, created_at: now, updated_at: now }
+        Self {
+            id,
+            slug,
+            name,
+            created_at: now,
+            updated_at: now,
+        }
     }
 }
 
